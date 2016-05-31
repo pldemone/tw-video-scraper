@@ -100,7 +100,7 @@ settings = {
 	#     is preserved, adding black borders
 	# symlink : (Linux only) Store images in an 'Original' folder, and make
 	#     symbolic links for each entry in 'symbolicfolders'
-	'scaleoption': 'resize',
+	'scaleoption': 'none',
 	'keepaspectratio': 'false',
 	'symbolicfolders': ['0x0','100x100','160x160','640x480','1920x1080'],
 
@@ -287,15 +287,17 @@ def main():
 	if Config['scaleoption'] == 'resize':
 		# resize the image
 		try:
-			import Image, re
+			from PIL import Image
+			import re
 			# try to get the scale option using regular expression
 			pattern = re.compile('(.*)/(\d{1,4})x(\d{1,4})/(.*)', re.IGNORECASE)
 			match = pattern.match(sys.argv[2])
 			scalewidth = int(match.group(2))
 			scaleheight = int(match.group(3))
-			Console.info("Convert size x:"+scalewidth+" y:"+scaleheight)
+			Console.info("Convert size x:"+match.group(2)+" y:"+match.group(3))
 
 			image = Image.open(sys.argv[2])
+			Console.info("MORE2")
 
 			if Config['keepaspectratio'] == 'true':
 				imagenew = Image.new('RGB', (scaleheight, scalewidth))
