@@ -4,7 +4,7 @@ settings = {
 	# the current working directory
 	# Leave empty to disable the database
 	'database': r'/var/twonky/TwonkyServer/tw-video-scraper.db',
-	
+
 	# Path where to download and extract the files
 	# downloaded from TVDB. The script will check
 	# if a file already exists, so it will not be
@@ -35,10 +35,10 @@ settings = {
 	# the generatecommand will be executed
 	# These values are not case sensitive
 	# Be careful with exclusions, these are matched against the whole path, e.g. if you
-	# exclude 'home', everything from /home/username will be ignored 
+	# exclude 'home', everything from /home/username will be ignored
 	'alwaysgenerate': [],
 	'alwaysignore': [],
-	
+
 	# Regular expression patterns to determine if
 	# a file is a series. First match should product
 	# the title, second match the season, third match
@@ -46,11 +46,11 @@ settings = {
 	'seriepatterns': ['(.*?)S(\d{1,2})E(\d{2})(.*)',
 					  '(.*?)\[?(\d{1,2})x(\d{2})\]?(.*)',
 					  '(.*?)Season.?(\d{1,2}).*?Episode.?(\d{1,2})(.*)'],
-	
+
 	# TVDB api settings
 	'tvdbapikey': '6262A88CCAB7E724',
 	'tvdblang': 'en',
-	
+
 	# Regular expression patterns for movies
 	# First try to get the year from the title
 	# If that fails, try to match the whole name
@@ -95,20 +95,20 @@ settings = {
 	# none : (Default option) Store images in a scale subdirectory, in the
 	#     original size
 	# resize : (Requires PIL Image) Store images in a scale subdirectory, resize
-	#     the image to the correct scale. If 'keepaspectratio' is set to 
-	#     false, the exact scale will be used, otherwise, the aspect ratio 
+	#     the image to the correct scale. If 'keepaspectratio' is set to
+	#     false, the exact scale will be used, otherwise, the aspect ratio
 	#     is preserved, adding black borders
 	# symlink : (Linux only) Store images in an 'Original' folder, and make
 	#     symbolic links for each entry in 'symbolicfolders'
 	'scaleoption': 'symlink',
 	'keepaspectratio': 'true',
 	'symbolicfolders': ['0x0','100x100','160x160', '1920x1080'],
-	
+
 	# Sometimes the downloaded JPEG cannot be in the correct format to display on
 	# certain deviced, e.g. the XBOX360 cannot display JPEG not of time JFIF standard
 	# Set this to true to this for all images (requires PIL Image)
 	'fixjpeg': 'true',
-	
+
 	# Save a copy of the image file in the same folder as the movie
 	# if 'savelocal' is true, a copy will be saved
 	# 'savelocalfilename' controls the name of the local copy. If set to
@@ -120,7 +120,7 @@ settings = {
 	'savelocal': 'false',
 	'savelocalfilename': '',
 	'savelocalalwaysoverwrite': 'false',
-	
+
 	# If no thumbnail can be found, a thumbnail can be generated
 	# using the following command. Leave empty to disable generating
 	# thumbnails
@@ -129,16 +129,16 @@ settings = {
 
 def main():
 	import sys
-	
+
 	if not Config['tmpdir'].endswith('/'):
 		Config['tmpdir'] = Config['tmpdir']+'/'
 
 	Dir(Config['tmpdir']).create()
-	
+
 	inputfile = None
 	inputdirectory = None
 	outputimage = None
-	
+
 	# Validate input arguments
 	if len(sys.argv) < 3:
 		Console.text("Usage: tw-video-scraper.py inputmovie outputimage")
@@ -174,7 +174,7 @@ def main():
 					Dir(cachedir + '/' + symlink).symlink('Original')
 
 	serie = Serie(sys.argv[1])
-	
+
 	if serie.isSerie():
 		thumbnail = serie.getThumbnail()
 	else:
@@ -194,7 +194,7 @@ def main():
 		file = sys.argv[1]
 		if file.find('/') >= 0:
 			file = file[file.rindex('/')+1:]
-			
+
 		if alwaysgenerate == True:
 			Console.info("Generate thumbnail because of explicit configuration ('alwaysgenerate')")
 		else:
@@ -208,7 +208,7 @@ def main():
 				os.system(Config['generatecommand'])
 			except:
 				Console.error("Failed to execute generate thumbnail command")
-				
+
 	if Config['fixjpeg'] == 'true':
 		try:
 			import Image
@@ -216,7 +216,7 @@ def main():
 			image.save(sys.argv[2])
 		except:
 			pass
-			
+
 	if Config['savelocal'] == 'true':
 		try:
 			if Config['savelocalfilename'] == '':
@@ -228,19 +228,19 @@ def main():
 					file = file[0:file.rindex('.')] + '.jpg'
 			else:
 				file = Config['savelocalfilename']
-			
+
 			if file == '':
 				# something went wrong with the file name, exit 'savelocal'
 				pass
-				
+
 			folder = sys.argv[1]
 			if folder.find('/') >= 0:
 				folder = folder[0:folder.rindex('/')+1]
 			else:
-				folder = ''	
-									
+				folder = ''
+
 			import Image, os
-			
+
 			if not os.path.isfile(folder + file) or Config['savelocalalwaysoverwrite'] == 'true':
 				image = Image.open(sys.argv[2])
 				image.save(folder + file)
@@ -256,14 +256,15 @@ def main():
 			match = pattern.match(sys.argv[2])
 			scalewidth = int(match.group(2))
 			scaleheight = int(match.group(3))
-			
+			Console.info("Convert size x:"+scalewidth+" y:"+scaleheight)
+
 			image = Image.open(sys.argv[2])
-			
+
 			if Config['keepaspectratio'] == 'true':
 				imagenew = Image.new('RGB', (scaleheight, scalewidth))
 				imagewidth = image.size[0]
 				imageheight = image.size[1]
-				
+
 				# landscape or portait?
 				if imageheight > imagewidth:
 					imagewidth = int(imagewidth * (float(scaleheight)/float(imageheight)))
@@ -278,13 +279,13 @@ def main():
 				image = imagenew
 			else:
 				image = image.resize((scalewidth, scaleheight), Image.ANTIALIAS)
-			
+
 			image.save(sys.argv[2])
 		except:
 			return
 
-	
-	
+
+
 class Serie:
 	fileName = None
 	file = None
@@ -295,17 +296,17 @@ class Serie:
 	episode = None
 	thumbnail = None
 	inDB = False
-	
+
 	def __init__(self, fileName):
 		self.fileName = fileName
 		self._parseFileName()
-	
+
 	def isSerie(self):
 		if self.name and self.season and self.episode and self.id:
 			return True
 		else:
 			return False
-		
+
 	def getThumbnail(self):
 		if not self.thumbnail:
 			self._getTVDBThumbnail()
@@ -315,9 +316,9 @@ class Serie:
 		import re
 
 		match = None
-		i = 0	
+		i = 0
 		patterns = Config['seriepatterns']
-		
+
 		# Separate the path name and the file name
 		if self.fileName.find('/') >= 0:
 			self.file = self.fileName[self.fileName.rindex('/')+1:]
@@ -325,8 +326,8 @@ class Serie:
 		else:
 			self.file = self.fileName
 			self.path = ''
-		
-		while not match:		
+
+		while not match:
 			if i > len(patterns)-1:
 				return False
 			pattern = re.compile(patterns[i], re.IGNORECASE)
@@ -336,22 +337,22 @@ class Serie:
 		self.name = self._cleanupFileName(match.group(1))
 		self.season = int(match.group(2))
 		self.episode = int(match.group(3))
-		
+
 		if self._retrieveID():
 			return True
 		else:
 			return False
-	
+
 	def _retrieveID(self):
 		if db.isEnabled():
-			db.execute('SELECT id FROM video WHERE type=\'serie\' and name=\''+db.escape(self.name)+'\'')		
+			db.execute('SELECT id FROM video WHERE type=\'serie\' and name=\''+db.escape(self.name)+'\'')
 			if db.rowcount() > 0:
 				self.id = str(db.fetchrow()[0])
 				self.inDB = True
-		
+
 		if not self.id:
 			import json, re
-			
+
 			apicall = URL('http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q='+self.name+' Series Info site:thetvdb.com').json(True)
 			if apicall:
 				data = json.loads(apicall)
@@ -378,7 +379,7 @@ class Serie:
 				if self.id and db.isEnabled() and self.inDB == False:
 					db.execute('INSERT INTO video (id,type,name) VALUES ('+str(db.escape(self.id))+',\'serie\',\''+db.escape(self.name)+'\')')
 		return self.id
-	
+
 	def _getTVDBThumbnail(self):
 		import os, time
 		if self.id:
@@ -399,14 +400,14 @@ class Serie:
 						self.thumbnail =  'http://www.thetvdb.com/banners/'+series.find('poster').text
 						return True
 				for episode in tree.findall('Episode'):
-					if int(episode.find('SeasonNumber').text) == self.season and int(episode.find('EpisodeNumber').text) == self.episode:			
-						if episode.find('filename').text:		
+					if int(episode.find('SeasonNumber').text) == self.season and int(episode.find('EpisodeNumber').text) == self.episode:
+						if episode.find('filename').text:
 							self.thumbnail =  'http://www.thetvdb.com/banners/'+episode.find('filename').text
 							return True
 			except:
 				pass
 		return False
-	
+
 	def _cleanupFileName(self, name):
 		name = name.lower()
 		name = name.replace('.',' ')
@@ -417,7 +418,7 @@ class Serie:
 			name = name[0:len(name)-1]
 			name = name.strip()
 		return name
-	
+
 	def _cleanupName(self, name):
 		if type(name) is unicode:
 			name = name.encode('utf8')
@@ -440,7 +441,7 @@ class Movie:
 	base_url = None
 	poster_size = None
 	inDB = False
-	
+
 	def __init__(self, fileName):
 		self.fileName = fileName
 		self._checkMovieDBConfiguration()
@@ -453,7 +454,7 @@ class Movie:
 			for row in db.execute('SELECT key,value,last_updated FROM config WHERE provider=\'themoviedb\''):
 				if row[0] == 'base_url' and row[2] > time.time() - 3600*24:
 					self.base_url = row[1]
-				if row[0] == 'poster_size' and row[2] > time.time() - 3600*24:	
+				if row[0] == 'poster_size' and row[2] > time.time() - 3600*24:
 					self.poster_size = row[1]
 		elif Config['moviedb_base_url']:
 			self.base_url = Config['moviedb_base_url']
@@ -468,7 +469,7 @@ class Movie:
 		apicall = URL('https://api.themoviedb.org/3/configuration?api_key='+Config['moviedbapikey']).json(True)
 		if apicall:
 			data = json.loads(apicall)
-			
+
 			self.base_url = data['images']['base_url']
 			for poster_size in Config['preferred_poster_size']:
 				if poster_size in data['images']['poster_sizes']:
@@ -490,20 +491,20 @@ class Movie:
 			return True
 		else:
 			return False
-			
+
 	def getThumbnail(self):
 		return self.thumbnail
-		
+
 	def _getMovieDBThumbnail(self, name, year = None):
 		import json
-		
+
 		match = False
 		
-		if db.isEnabled():			
+		if db.isEnabled():
 			if year:
 				db.execute('SELECT id FROM video WHERE type=\'movie\' and name=\''+db.escape(name)+'\' and year='+db.escape(year))
 			else:
-				db.execute('SELECT id FROM video WHERE type=\'movie\' and name=\''+db.escape(name)+'\'')	
+				db.execute('SELECT id FROM video WHERE type=\'movie\' and name=\''+db.escape(name)+'\'')
 			if db.rowcount() > 0:
 				self.id = str(db.fetchrow()[0])
 				self.inDB = True
@@ -520,7 +521,7 @@ class Movie:
 
 			if apicall:
 				data = json.loads(apicall)
-				
+
 				if int(data['total_results']) == 0:
 					# No results found, no need to parse everything
 					return False
@@ -528,7 +529,7 @@ class Movie:
 					# If the search has only 1 result, assume that it's the correct movie
 					movie = data['results'][0]
 					match = True
-				
+
 				if match == False:
 					for movie in data['results']:
 						# try to match the name, and -if exist- the original name
@@ -543,21 +544,21 @@ class Movie:
 				if match == False and Config['alwaysguessmovie'] == True:
 					movie = data['results'][0]
 					match = True
-				
+
 		if match:
 			if db.isEnabled() and self.inDB == False:
 				self.id = movie['id']
 				if year:
 					db.execute('INSERT INTO video (id,type,name,year) VALUES ('+db.escape(str(self.id))+',\'movie\',\''+db.escape(name)+'\','+db.escape(str(year))+')')
 				else:
-					db.execute('INSERT INTO video (id,type,name) VALUES ('+db.escape(str(self.id))+',\'movie\',\''+db.escape(name)+'\')')	
+					db.execute('INSERT INTO video (id,type,name) VALUES ('+db.escape(str(self.id))+',\'movie\',\''+db.escape(name)+'\')')
 
 			if movie['poster_path']:
 				self.thumbnail = self.base_url + self.poster_size + movie['poster_path']
 				return True
-		
+
 		return False
-		
+
 	def _cleanupFileName(self, name):
 		name = name.lower()
 		name = name.replace('.',' ')
@@ -565,7 +566,7 @@ class Movie:
 		name = name.replace('\'',' ')
 		name = name.strip()
 		return name
-		
+
 	def _cleanupName(self, name):
 		if type(name) is unicode:
 			name = name.encode('utf8')
@@ -579,7 +580,7 @@ class Movie:
 	def _parseFileName(self):
 
 		match = None
-		i = 0	
+		i = 0
 		patterns = Config['moviepatterns']
 		# Separate the path name and the file name
 		if self.fileName.find('/') >= 0:
@@ -594,29 +595,29 @@ class Movie:
 				pass
 		else:
 			self.file = self.fileName
-		
+
 		# If there is a parent folder, first try that match that
 		if self.parentfolder and Config['parentdir'].count(self.parentfolder) == 0:
 			if self._matchPattern(self.parentfolder):
 				if self._getMovieDBThumbnail(self.name, self.year):
-					return True	
-				
+					return True
+
 		# If the script comes here, no thumbnail could be found based on the parent directory's name
 		# Next, try the file name
 		if self._matchPattern(self.file):
 			if self._getMovieDBThumbnail(self.name, self.year):
 				return True
-		
+
 		return False
-		
+
 	def _matchPattern(self, matchPattern):
 		import re
-		
+
 		match = None
-		i = 0	
+		i = 0
 		patterns = Config['moviepatterns']
-		
-		while not match:		
+
+		while not match:
 			if i > len(patterns)-1:
 				return False
 			pattern = re.compile(patterns[i], re.IGNORECASE)
@@ -631,17 +632,17 @@ class Movie:
 					self.year = match.group(2).strip()
 			except:
 				self.year = None
-	
+
 		if self.name:
 			return True
-			
+
 		return False
 
 class Dir:
 	_path = None
 
 	def __init__(self, path):
-		self._path = path 
+		self._path = path
 
 	def exists(self):
 		import os
@@ -689,22 +690,22 @@ class Database:
 	_result = None
 	_enabled = False
 	_row = 0
-	
+
 	def __init__(self, database = None):
 		if database:
 			try:
 				import sqlite3, os
-				
+
 				dbdir = Config['database'].replace('\\','/')
 				if dbdir.find('/') >= 0:
 					dbdir = dbdir[0:dbdir.rindex('/')+1]
 				Dir(dbdir).create()
-			
+
 				self._sql = sqlite3.connect(database)
-			
+
 				self.execute('create table if not exists video (id int, type text, name text, year int)')
 				self.execute('create table if not exists config (provider text, key text, value text, last_updated int)')
-				
+
 				self._enabled = True
 			except:
 				Console.warning("Could not open/create database. Running without database...")
@@ -725,12 +726,12 @@ class Database:
 			return self._result
 		except:
 			return False
-	
+
 	def close(self):
 		if not self._sql:
 			return False
 		self._sql.close()
-		
+
 	def rowcount(self):
 		if not self._sql:
 			return False
@@ -738,7 +739,7 @@ class Database:
 			return len(self._result)
 		except:
 			return False
-	
+
 	def fetchrow(self):
 		if not self._sql:
 			return False
@@ -749,7 +750,7 @@ class Database:
 		t = self._result[self._row]
 		self._row = self._row+1
 		return t
-	
+
 	def fetchall(self):
 		if not self._sql:
 			return False
@@ -761,13 +762,13 @@ class Database:
 class URL:
 	url = None
 	ver = 2
-	
+
 	def __init__(self, url):
 		import sys, urllib
 		if sys.version_info[0] > 2:
 			self.ver = 3
 		self.url = urllib.quote_plus(url, ':/?=&')
-		
+
 	def open(self):
 		if self.ver == 3:
 			import urllib.request
@@ -804,7 +805,7 @@ class URL:
 					return response
 			except:
 				return None
-	
+
 	def download(self, location):
 		if self.ver == 3:
 			import urllib.request
@@ -881,7 +882,7 @@ class PrintLog:
 	def debug(self, text):
 		if self._loglevel >= 4:
 			self._print(text, 'debug')
-		
+
 Config = dict(settings)
 Console = PrintLog(Config['loglevel'], Config['colouredoutput'])
 db = Database(Config['database'])
