@@ -125,10 +125,20 @@ settings = {
 	# using the following command. Leave empty to disable generating
 	# thumbnails
 	'generatecommand': r'ffmpeg -itsoffset -30 -i "$infile" -y -vcodec mjpeg -vframes 1 -an -f rawvideo -s 624x352 "$outfile"',
+
+	# MKV file manipulation
+	# Write the themoviedb.org title to a MKV file
+	'fixmkvtitle': 'true',
+	'mkveditcommand': r'mkvpropedit "$infile" --set "title=$title" &> /dev/null',
+	# 'mkveditcommand': r'mtime=$(stat -c %y "$infile"); mkvpropedit "$infile" --set "title=$title"; touch -d "$mtime" "$infile"  &> /dev/null',
+
+	# Delete the old title if themoviedb.org title was not found
+	'fixmkvdelnotitle': 'true',
+	'mkvdelcommand': 'mtime=$(stat -c %y "$infile"); mkvpropedit "$infile" --delete "title" &> /dev/null; touch -d "$mtime" "$infile"',
 }
 
 def main():
-	import sys
+	import sys, os
 
 	if not Config['tmpdir'].endswith('/'):
 		Config['tmpdir'] = Config['tmpdir']+'/'
@@ -157,7 +167,7 @@ def main():
 	if Config['scaleoption'] == 'symlink':
 		# make symlinks
 		try:
-			import os, re
+			import re
 			create_symlink = False
 			pattern = re.compile('(.*)/(\d{1,4})x(\d{1,4})/(.*)', re.IGNORECASE)
 			match = pattern.match(sys.argv[2])
@@ -180,6 +190,7 @@ def main():
 	else:
 		movie = Movie(sys.argv[1])
 		thumbnail = movie.getThumbnail()
+		movietitle = movie.getTitle()
 
 	# Check if part of the path is in the alwaysgenerate option
 	alwaysgenerate = False
@@ -203,7 +214,6 @@ def main():
 		if Config['generatecommand'] != '':
 			Console.info("Generating thumbnail...")
 			try:
-				import os
 				Config['generatecommand'] = Config['generatecommand'].replace('$infile',sys.argv[1]).replace('$outfile',sys.argv[2])
 				os.system(Config['generatecommand'])
 			except:
@@ -214,6 +224,22 @@ def main():
 			import Image
 			image = Image.open(sys.argv[2])
 			image.save(sys.argv[2])
+		except:
+			pass
+
+	filename, file_extension = os.path.splitext(sys.argv[1])
+	if Config['fixmkvtitle'] == 'true' and file_extension == '.mkv':
+		# Correct the title
+		try:
+			if movietitle:
+				Console.info("Correct the title: "+movietitle)
+				Config['mkveditcommand'] = Config['mkveditcommand'].replace('$infile',sys.argv[1]).replace('$title',movietitle)
+				os.system(Config['mkveditcommand'])
+			else:
+				if Config['fixmkvdelnotitle'] == 'true':
+					Console.info("Title NOT found. Delete title tag from "+filename+file_extension)
+					Config['mkvdelcommand'] = Config['mkvdelcommand'].replace('$infile',sys.argv[1])
+					os.system(Config['mkvdelcommand'])
 		except:
 			pass
 
@@ -239,7 +265,7 @@ def main():
 			else:
 				folder = ''
 
-			import Image, os
+			import Image
 
 			if not os.path.isfile(folder + file) or Config['savelocalalwaysoverwrite'] == 'true':
 				image = Image.open(sys.argv[2])
@@ -283,7 +309,6 @@ def main():
 			image.save(sys.argv[2])
 		except:
 			return
-
 
 
 class Serie:
@@ -438,6 +463,7 @@ class Movie:
 	year = None
 	id = None
 	thumbnail = None
+	movietitle = None
 	base_url = None
 	poster_size = None
 	inDB = False
@@ -495,11 +521,14 @@ class Movie:
 	def getThumbnail(self):
 		return self.thumbnail
 
+	def getTitle(self):
+		return self.movietitle
+
 	def _getMovieDBThumbnail(self, name, year = None):
 		import json
 
 		match = False
-		
+
 		if db.isEnabled():
 			if year:
 				db.execute('SELECT id FROM video WHERE type=\'movie\' and name=\''+db.escape(name)+'\' and year='+db.escape(year))
@@ -552,6 +581,10 @@ class Movie:
 					db.execute('INSERT INTO video (id,type,name,year) VALUES ('+db.escape(str(self.id))+',\'movie\',\''+db.escape(name)+'\','+db.escape(str(year))+')')
 				else:
 					db.execute('INSERT INTO video (id,type,name) VALUES ('+db.escape(str(self.id))+',\'movie\',\''+db.escape(name)+'\')')
+
+			# Save the movie title just for complete movies
+			if year and movie['title']:
+				self.movietitle = movie['title']
 
 			if movie['poster_path']:
 				self.thumbnail = self.base_url + self.poster_size + movie['poster_path']
