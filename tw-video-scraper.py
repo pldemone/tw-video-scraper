@@ -3,13 +3,13 @@ settings = {
 	# use only a file name to use the database in
 	# the current working directory
 	# Leave empty to disable the database
-	'database': r'/var/twonky/TwonkyServer/tw-video-scraper.db',
+	'database': r'/data/cache/twonky/db/tw-video-scraper.db',
 
 	# Path where to download and extract the files
 	# downloaded from TVDB. The script will check
 	# if a file already exists, so it will not be
 	# downloaded again.
-	'tmpdir': r'/tmp/tw-video-scraper/',
+	'tmpdir': r'/data/cache/tmp/tw-video-scraper/',
 
 	# Log level
 	# 1: ERROR only
@@ -100,9 +100,9 @@ settings = {
 	#     is preserved, adding black borders
 	# symlink : (Linux only) Store images in an 'Original' folder, and make
 	#     symbolic links for each entry in 'symbolicfolders'
-	'scaleoption': 'symlink',
-	'keepaspectratio': 'true',
-	'symbolicfolders': ['0x0','100x100','160x160', '1920x1080'],
+	'scaleoption': 'resize',
+	'keepaspectratio': 'false',
+	'symbolicfolders': ['0x0','100x100','160x160','640x480','1920x1080'],
 
 	# Sometimes the downloaded JPEG cannot be in the correct format to display on
 	# certain deviced, e.g. the XBOX360 cannot display JPEG not of time JFIF standard
