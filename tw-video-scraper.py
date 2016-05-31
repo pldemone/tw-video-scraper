@@ -126,6 +126,11 @@ settings = {
 	# thumbnails
 	'generatecommand': r'ffmpeg -itsoffset -30 -i "$infile" -y -vcodec mjpeg -vframes 1 -an -f rawvideo -s 624x352 "$outfile"',
 
+	# International output. If set to 'de-DE' as example, the title and the
+	# downloaded thumbnail will be German. Please refer to the themoviedb.org
+	# language definition for other language options.
+	'outputlang': 'en-US',
+
 	# MKV file manipulation
 	# Write the themoviedb.org title to a MKV file
 	'fixmkvtitle': 'true',
@@ -136,6 +141,11 @@ settings = {
 	'fixmkvdelnotitle': 'true',
 	'mkvdelcommand': 'mtime=$(stat -c %y "$infile"); mkvpropedit "$infile" --delete "title" &> /dev/null; touch -d "$mtime" "$infile"',
 }
+
+import unicodedata
+def strip_accents(s):
+   return ''.join(c for c in unicodedata.normalize('NFD', s)
+                  if unicodedata.category(c) != 'Mn')
 
 def main():
 	import sys, os
@@ -232,6 +242,7 @@ def main():
 		# Correct the title
 		try:
 			if movietitle:
+				movietitle = strip_accents(movietitle)
 				Console.info("Correct the title: "+movietitle)
 				Config['mkveditcommand'] = Config['mkveditcommand'].replace('$infile',sys.argv[1]).replace('$title',movietitle)
 				os.system(Config['mkveditcommand'])
@@ -544,9 +555,9 @@ class Movie:
 
 		if not self.id:
 			if year:
-				apicall = URL('http://api.themoviedb.org/3/search/movie?api_key='+Config['moviedbapikey']+'&query='+name+'&year='+year).json(True)
+				apicall = URL('http://api.themoviedb.org/3/search/movie?language='+Config['outputlang']+'&api_key='+Config['moviedbapikey']+'&query='+name+'&year='+year).json(True)
 			else:
-				apicall = URL('http://api.themoviedb.org/3/search/movie?api_key='+Config['moviedbapikey']+'&query='+name).json(True)
+				apicall = URL('http://api.themoviedb.org/3/search/movie?language='+Config['outputlang']+'&api_key='+Config['moviedbapikey']+'&query='+name).json(True)
 
 			if apicall:
 				data = json.loads(apicall)
