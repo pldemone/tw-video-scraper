@@ -691,7 +691,6 @@ class Dir:
 				return True
 			except:
 				pass
-		Console.warning("Error while creating directory")
 		return False
 
 	def delete(self):
