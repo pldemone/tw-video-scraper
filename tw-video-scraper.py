@@ -100,7 +100,7 @@ settings = {
 	# symlink : (Linux only) Store images in an 'Original' folder, and make
 	#     symbolic links for each entry in 'symbolicfolders'
 	'scaleoption': 'symlink',
-	'keepaspectratio': 'true',
+	'keepaspectratio': 'false',
 	'symbolicfolders': ['0x0','100x100','160x160','640x480','800x600','1920x1080'],
 
 	# Use the movie backdrop as image if the output image width > image high
@@ -731,17 +731,19 @@ class Dir:
 				return True
 			except:
 				pass
+		Console.warning("Error while creating directory")
 		return False
 
 	def delete(self):
-		import os
+		import shutil
 		if self.exists():
 			try:
 				Console.debug("Deleting directory " + self._path)
-				os.rmdir(self._path)
+				shutil.rmtree(self._path)
 				return True
 			except:
-				pass
+				return True
+		Console.warning("Error while deleting directory")
 		return False
 
 	def symlink(self, source):
