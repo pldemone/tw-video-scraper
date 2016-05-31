@@ -100,9 +100,14 @@ settings = {
 	#     is preserved, adding black borders
 	# symlink : (Linux only) Store images in an 'Original' folder, and make
 	#     symbolic links for each entry in 'symbolicfolders'
-	'scaleoption': 'none',
-	'keepaspectratio': 'false',
-	'symbolicfolders': ['0x0','100x100','160x160','640x480','1920x1080'],
+	'scaleoption': 'symlink',
+	'keepaspectratio': 'true',
+	'symbolicfolders': ['0x0','100x100','160x160','640x480','800x600','1920x1080'],
+
+	# Use the movie backdrop as image if the output image width > image high
+	# If the output size is > maxwidthforbackdrop use the standard image
+	'usebackdrop': 'true',
+	'maxwidthforbackdrop': 800,
 
 	# Sometimes the downloaded JPEG cannot be in the correct format to display on
 	# certain deviced, e.g. the XBOX360 cannot display JPEG not of time JFIF standard
@@ -185,12 +190,22 @@ def main():
 			if not Dir(cachedir + '/Original').exists():
 				Dir(cachedir + '/Original').create()
 				Dir(cachedir + '/' + match.group(2) + 'x' + match.group(3)).delete()
+			if not Dir(cachedir + '/OriginalBack').exists():
+				Dir(cachedir + '/OriginalBack').create()
+				Dir(cachedir + '/' + match.group(2) + 'x' + match.group(3)).delete()
 			create_symlink = True
 		except:
 			Console.debug("Could not parse image size from image folder name")
 
 		if create_symlink == True:
 			for symlink in Config['symbolicfolders']:
+				pattern = re.compile('(\d{1,4})x(\d{1,4})', re.IGNORECASE)
+				match = pattern.match(symlink)
+				width = int(match.group(1))
+				height = int(match.group(2))
+				if Config['usebackdrop'] == 'true' and Config['maxwidthforbackdrop'] >= width and width > height:
+					Dir(cachedir + '/' + symlink).symlink('OriginalBack')
+				else:
 					Dir(cachedir + '/' + symlink).symlink('Original')
 
 	serie = Serie(sys.argv[1])
@@ -297,7 +312,6 @@ def main():
 			Console.info("Convert size x:"+match.group(2)+" y:"+match.group(3))
 
 			image = Image.open(sys.argv[2])
-			Console.info("MORE2")
 
 			if Config['keepaspectratio'] == 'true':
 				imagenew = Image.new('RGB', (scaleheight, scalewidth))
@@ -599,6 +613,19 @@ class Movie:
 			if year and movie['title']:
 				self.movietitle = movie['title']
 
+			# Use the backdrop as image if width > height
+			if Config['usebackdrop'] == 'true' and movie['backdrop_path']:
+				import re, sys
+				pattern = re.compile('(.*)/(\d{1,4})x(\d{1,4})/(.*)', re.IGNORECASE)
+				filematch = pattern.match(sys.argv[2])
+				if filematch:
+					scalewidth = int(filematch.group(2))
+					scaleheight = int(filematch.group(3))
+					if scalewidth > scaleheight:
+						Console.info("Use backdrop as image")
+						self.thumbnail = self.base_url + self.poster_size + movie['backdrop_path']
+						return True
+
 			if movie['poster_path']:
 				self.thumbnail = self.base_url + self.poster_size + movie['poster_path']
 				return True
@@ -715,7 +742,6 @@ class Dir:
 				return True
 			except:
 				pass
-		Console.warning("Error while deleting directory")
 		return False
 
 	def symlink(self, source):
