@@ -564,7 +564,7 @@ class Movie:
 			if db.rowcount() > 0:
 				self.id = str(db.fetchrow()[0])
 				self.inDB = True
-				apicall = URL('http://api.themoviedb.org/3/movie/'+self.id+'?api_key='+Config['moviedbapikey']).json(True)
+				apicall = URL('http://api.themoviedb.org/3/movie/'+self.id+'?language='+Config['outputlang']+'&api_key='+Config['moviedbapikey']).json(True)
 				if apicall:
 					movie = data = json.loads(apicall)
 					match = True
