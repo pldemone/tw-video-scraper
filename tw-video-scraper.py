@@ -3,14 +3,13 @@ settings = {
 	# use only a file name to use the database in
 	# the current working directory
 	# Leave empty to disable the database
-	'database': r'/data/cache/twonky/db/tw-video-scraper.db',
+	'database': r'/var/twonky/twonkyserver/db/tw-video-scraper.db',
 
 	# Path where to download and extract the files
 	# downloaded from TVDB. The script will check
 	# if a file already exists, so it will not be
 	# downloaded again.
-	'tmpdir': r'/data/cache/tmp/tw-video-scraper/',
-
+	'tmpdir': r'/var/twonky/twonkyserver/tmp/tw-video-scraper/',
 	# Log level
 	# 1: ERROR only
 	# 2: ERROR and WARNING
@@ -149,8 +148,9 @@ settings = {
 
 import unicodedata
 def strip_accents(s):
-   return ''.join(c for c in unicodedata.normalize('NFD', s)
-                  if unicodedata.category(c) != 'Mn')
+	return ''.join(c for c in unicodedata.normalize('NFD', s)
+		if unicodedata.category(c) != 'Mn')
+
 
 def main():
 	import sys, os

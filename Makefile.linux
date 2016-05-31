@@ -1,5 +1,5 @@
 #################################################################################
-# tw-video-scrapper makefile                                                    #
+# tw-video-scraper makefile                                                    #
 #################################################################################
 #                                                                               #
 # WARRANTY DISCLAIMER:                                                          #
@@ -29,12 +29,35 @@
 #################################################################################
 
 PREFIX		= /opt/twonky
+PYTHONPATH	= /usr/bin
+TWONKYDATA	= /var/twonky/twonkyserver
+
+# Don't change
+CACHEDIR := $(shell grep "cachedir=" ${TWONKYDATA}/twonkyserver.ini | sed 's/cachedir=//')
+DBDIR := $(shell grep "dbdir=" ${TWONKYDATA}/twonkyserver.ini | sed 's/dbdir=//')
+LANGUAGE := $(shell grep "language=" ${TWONKYDATA}/twonkyserver.ini | sed 's/language=//')
 
 install:
 	mkdir -p $(PREFIX)/cgi-bin/
+	mkdir -p $(TWONKYDATA)/tmp/
 	install -m 0755 -o root -g root tw-video-scraper.py $(PREFIX)/cgi-bin/
 	install -m 0644 -o root -g root python.location $(PREFIX)/cgi-bin/
 	install -m 0644 -o root -g root python-tw-video-scraper.desc $(PREFIX)/cgi-bin/
+
+	sed -i 's#python /opt/twonky/#python $(PREFIX)/#' $(PREFIX)/cgi-bin/python-tw-video-scraper.desc
+	sed -i 's#/usr/bin#$(PYTHONPATH)#' $(PREFIX)/cgi-bin/tw-video-scraper.py
+	sed -i 's#/var/twonky/twonkyserver#$(TWONKYDATA)#' $(PREFIX)/cgi-bin/tw-video-scraper.py
+
+	@echo
+	@echo Don\'t forget to remove the cache and/or database content
+	@echo
+	@echo "   rm -f $(DBDIR)/tw-video-scraper.db"
+	@echo "   rm -rf $(CACHEDIR)/images/*"
+# Preliminary
+ifeq ($(LANGUAGE),de)
+	@echo "   sed -i 's%en-US%de-DE%' $(PREFIX)/cgi-bin/tw-video-scraper.py"
+endif
+	@echo
 
 uninstall:
 	rm $(PREFIX)/cgi-bin/tw-video-scraper.py
