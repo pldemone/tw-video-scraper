@@ -13,6 +13,10 @@ EXECPATH=/opt/twonky/cgi-bin
 # Check the file input
 INFILE="$1"
 OUTFILE="$2"
+WIDTH="$3"
+HEIGHT="$4"
+ROTATION="$5"
+MODE="$6"
 
 if [ ! -z "${INFILE}" ] && [ ! -z "${OUTFILE}" ]; then
 	if [ `echo ${INFILE} | grep '\/[0-9]\{1,4\}x[0-9]\{1,4\}\/' | wc -l` -gt "0" ]; then
@@ -32,6 +36,6 @@ if [ ! -z "${INFILE}" ] && [ ! -z "${OUTFILE}" ]; then
 	fi
 fi
 
-${EXECPATH}/cgi-jpegscale.bin $@
+${EXECPATH}/cgi-jpegscale.bin "${INFILE}" "${OUTFILE}" ${WIDTH} ${HEIGHT} ${ROTATION} ${MODE}
 exit
 
