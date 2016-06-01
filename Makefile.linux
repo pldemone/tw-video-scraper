@@ -43,10 +43,16 @@ install:
 	install -m 0755 -o root -g root tw-video-scraper.py $(PREFIX)/cgi-bin/
 	install -m 0644 -o root -g root python.location $(PREFIX)/cgi-bin/
 	install -m 0644 -o root -g root python-tw-video-scraper.desc $(PREFIX)/cgi-bin/
+# Wrapper for cgi-jpegscale which will control the image generation
+ifneq ("$(wildcard $(PREFIX)/cgi-bin/cgi-jpegscale.bin)","")
+	install -m 0755 -o root -g root cgi-jpegscale $(PREFIX)/cgi-bin/cgi-jpegscale
+endif
+
 
 	sed -i 's#python /opt/twonky/#python $(PREFIX)/#' $(PREFIX)/cgi-bin/python-tw-video-scraper.desc
 	sed -i 's#/usr/bin#$(PYTHONPATH)#' $(PREFIX)/cgi-bin/tw-video-scraper.py
 	sed -i 's#/var/twonky/twonkyserver#$(TWONKYDATA)#' $(PREFIX)/cgi-bin/tw-video-scraper.py
+	sed -i 's#/opt/twonky/cgi-bin#$(PREFIX)/cgi-bin#' $(PREFIX)/cgi-bin/cgi-jpegscale
 
 	@echo
 	@echo Don\'t forget to remove the cache and/or database content

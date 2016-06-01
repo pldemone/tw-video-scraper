@@ -1,0 +1,35 @@
+#!/bin/bash
+
+#
+# Wrapper for cgi-jpegscale to provide covers for several resolutions
+#
+# Rename the original cgi-jpegscale in the directory /opt/twonky/cgi-bin/
+# Use cgi-jpegscale.bin as name of the new file
+#
+
+PYTHONBIN=/usr/bin
+EXECPATH=/opt/twonky/cgi-bin
+
+# Check the file input
+INFILE="$1"
+OUTFILE="$2"
+
+if [ ! -z "${INFILE}" ] && [ ! -z "${OUTFILE}" ]; then
+	if [ `echo ${INFILE} | grep '\/[0-9]\{1,4\}x[0-9]\{1,4\}\/' | wc -l` -gt "0" ]; then
+		# Digit inside the output directory found
+		if [ `echo ${INFILE} | grep \('[0-9]\{4\}'\)\.mkv.jpg | wc -l` -gt "0" ]; then
+		# MKV movie found. Don't convert - generate a new cover
+			echo "MKV movie found. Don't convert, but generate a new cover"
+			filename=$(basename "${INFILE}")
+			filename="${filename%.*}"
+			COMMAND="$PYTHONBIN/python $EXECPATH/tw-video-scraper.py"
+
+			$COMMAND "$filename" "${OUTFILE}"
+			exit
+		fi
+	fi
+fi
+
+${EXECPATH}/cgi-jpegscale.bin $@
+exit
+

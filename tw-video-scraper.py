@@ -138,12 +138,12 @@ settings = {
 	# MKV file manipulation
 	# Write the themoviedb.org title to a MKV file
 	'fixmkvtitle': 'true',
-	'mkveditcommand': r'mkvpropedit "$infile" --set "title=$title" &> /dev/null',
+	'mkveditcommand': r'if [ -e "$infile" ]; then mkvpropedit "$infile" --set "title=$title" &> /dev/null; fi',
 	# 'mkveditcommand': r'mtime=$(stat -c %y "$infile"); mkvpropedit "$infile" --set "title=$title"; touch -d "$mtime" "$infile"  &> /dev/null',
 
 	# Delete the old title if themoviedb.org title was not found
 	'fixmkvdelnotitle': 'true',
-	'mkvdelcommand': 'mtime=$(stat -c %y "$infile"); mkvpropedit "$infile" --delete "title" &> /dev/null; touch -d "$mtime" "$infile"',
+	'mkvdelcommand': 'if [ -e "$infile" ]; then mtime=$(stat -c %y "$infile"); mkvpropedit "$infile" --delete "title" &> /dev/null; touch -d "$mtime" "$infile"; fi',
 }
 
 import unicodedata
