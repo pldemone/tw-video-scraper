@@ -25,7 +25,9 @@ if [ ! -z "${INFILE}" ] && [ ! -z "${OUTFILE}" ]; then
 			COMMAND="$PYTHONBIN/python $EXECPATH/tw-video-scraper.py"
 
 			$COMMAND "$filename" "${OUTFILE}"
-			exit
+			if [ -e "${OUTFILE}" ]; then
+				exit
+			fi
 		fi
 	fi
 fi
