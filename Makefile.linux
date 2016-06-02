@@ -38,6 +38,10 @@ DBDIR := $(shell grep "dbdir=" ${TWONKYDATA}/twonkyserver.ini | sed 's/dbdir=//'
 LANGUAGE := $(shell grep "language=" ${TWONKYDATA}/twonkyserver.ini | sed 's/language=//')
 
 install:
+
+	test -f $(PREFIX)/twonkyserver && \
+		echo Twonkyserver installation not found inside the $(PREFIX) directory
+
 	mkdir -p $(PREFIX)/cgi-bin/
 	mkdir -p $(TWONKYDATA)/tmp/
 	install -m 0755 -o root -g root tw-video-scraper.py $(PREFIX)/cgi-bin/
