@@ -61,12 +61,20 @@ endif
 	@echo
 	@echo Don\'t forget to remove the cache and/or database content
 	@echo
-	@echo "   rm -f $(DBDIR)/tw-video-scraper.db"
-	@echo "   rm -rf $(CACHEDIR)/images/*"
-# Preliminary
+	@echo Optional commands:
+	@echo =================================================================
+	@echo rm -f $(DBDIR)/tw-video-scraper.db
+	@echo rm -rf $(CACHEDIR)/images/*
+
 ifeq ($(LANGUAGE),de)
-	@echo "   sed -i 's%en-US%de-DE%' $(PREFIX)/cgi-bin/tw-video-scraper.py"
+	@echo \# Changes for foreign language support
+	@echo sed -i 's%en-US%de-DE%' $(PREFIX)/cgi-bin/tw-video-scraper.py
+	@echo sed -i \"s%\'fixmkvtitle\': \'false\'%\'fixmkvtitle\': \'true\'%\"g $(PREFIX)/cgi-bin/tw-video-scraper.py
+	@echo sed -i \"s%\'fixmkvdelnotitle\': \'false\'%\'fixmkvdelnotitle\': \'true\'%\"g $(PREFIX)/cgi-bin/tw-video-scraper.py
 endif
+	@echo =================================================================
+	@echo
+	@echo "   Check other options in the file $(PREFIX)/cgi-bin/tw-video-scraper.py"
 	@echo
 
 uninstall:

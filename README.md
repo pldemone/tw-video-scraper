@@ -49,6 +49,9 @@ At least `jpeg-scale.desc` and `cgi-jpegscale` plugin must also be enabled.
 
 * Python 2.6 or higher (works with Python 3)
 * Python Image Library (optional)
+* ffmpeg (optional)
+* mkveditcommand (optional for MKV file manipulation)
+* mkvdelcommand (optional for MKV file manipulation)
 
 ## How it works
 
